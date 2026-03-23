@@ -34,11 +34,12 @@ pub const fn digit_count(n: usize) -> usize {
 pub trait NumToAscii<const D: usize>: Copy + Div + Rem + PartialEq + Sized {
     fn get_num_digits(self) -> ([u8; D], usize);
 
-    fn asciify(self) -> ([u8; D], usize) {
+    fn ascii_bytes(self) -> ([u8; D], usize) {
         let (mut digits, size) = self.get_num_digits();
-        digits.iter_mut().for_each(|d| {
-            *d = byte_to_ascii(*d);
-        });
+        let dgtcp = digits;
+        for idx in 0..size {
+            digits[idx] = byte_to_ascii(dgtcp[size - idx - 1]);
+        }
 
         (digits, size)
     }
@@ -51,9 +52,11 @@ macro_rules! num_to_ascii {
                 let mut nums = [0; _];
                 let mut idx = 0;
                 while idx < nums.len() {
+                    extern crate std;
                     let next = self / 10;
                     if next == 0 {
                         nums[idx] = self as u8;
+                        idx += 1;
                         break;
                     }
 
@@ -83,3 +86,47 @@ num_to_ascii_many!(
     { digits = digit_count(64) + 1, type = u64 },
     { digits = digit_count(128) + 1, type = u128 }
 );
+
+#[cfg(test)]
+mod tests {
+    use super::NumToAscii;
+
+    #[test]
+    fn digits3() {
+        let res = b"168";
+        let slice = &mut [0, 0, 0];
+
+        let (ascii, size) = 168u8.ascii_bytes();
+        for idx in 0..size {
+            slice[idx] = ascii[idx];
+        }
+
+        assert_eq!(&slice, &res);
+    }
+
+    #[test]
+    fn digits4() {
+        let res = b"1012";
+        let slice = &mut [0, 0, 0, 0];
+
+        let (ascii, size) = 1012u16.ascii_bytes();
+        for idx in 0..size {
+            slice[idx] = ascii[idx];
+        }
+
+        assert_eq!(&slice, &res);
+    }
+
+    #[test]
+    fn digitsu32() {
+        let res = b"3560470";
+        let slice = &mut [0, 0, 0, 0, 0, 0, 0];
+
+        let (ascii, size) = 3560470u32.ascii_bytes();
+        for idx in 0..size {
+            slice[idx] = ascii[idx];
+        }
+
+        assert_eq!(&slice, &res);
+    }
+}

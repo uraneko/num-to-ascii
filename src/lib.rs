@@ -84,7 +84,13 @@ num_to_ascii_many!(
     { digits = digit_count(16) + 1, type = u16 },
     { digits = digit_count(32) + 1, type = u32 },
     { digits = digit_count(64) + 1, type = u64 },
-    { digits = digit_count(128) + 1, type = u128 }
+    { digits = digit_count(128) + 1, type = u128 },
+    { digits = digit_count(8) + 1, type = i8 },
+    { digits = digit_count(16) + 1, type = i16 },
+    { digits = digit_count(32) + 1, type = i32 },
+    { digits = digit_count(64) + 1, type = i64 },
+    { digits = digit_count(128) + 1, type = i128 }
+
 );
 
 #[cfg(test)]
@@ -92,41 +98,58 @@ mod tests {
     use super::NumToAscii;
 
     #[test]
-    fn digits3() {
+    fn u8() {
         let res = b"168";
-        let slice = &mut [0, 0, 0];
-
         let (ascii, size) = 168u8.ascii_bytes();
-        for idx in 0..size {
-            slice[idx] = ascii[idx];
-        }
 
-        assert_eq!(&slice, &res);
+        assert_eq!(&ascii[..size], res.as_slice());
     }
 
     #[test]
-    fn digits4() {
+    fn u16() {
         let res = b"1012";
-        let slice = &mut [0, 0, 0, 0];
-
         let (ascii, size) = 1012u16.ascii_bytes();
-        for idx in 0..size {
-            slice[idx] = ascii[idx];
-        }
 
-        assert_eq!(&slice, &res);
+        assert_eq!(&ascii[..size], res.as_slice());
     }
 
     #[test]
-    fn digitsu32() {
+    fn u32() {
         let res = b"3560470";
-        let slice = &mut [0, 0, 0, 0, 0, 0, 0];
-
         let (ascii, size) = 3560470u32.ascii_bytes();
-        for idx in 0..size {
-            slice[idx] = ascii[idx];
-        }
 
-        assert_eq!(&slice, &res);
+        assert_eq!(&ascii[..size], res.as_slice());
+    }
+
+    #[test]
+    fn i8() {
+        let res = b"70";
+        let (ascii, size) = 70i8.ascii_bytes();
+
+        assert_eq!(&ascii[..size], res.as_slice());
+    }
+
+    #[test]
+    fn i16() {
+        let res = b"26345";
+        let (ascii, size) = 26345i16.ascii_bytes();
+
+        assert_eq!(&ascii[..size], res.as_slice());
+    }
+
+    #[test]
+    fn i640() {
+        let res = b"0";
+        let (ascii, size) = 0i64.ascii_bytes();
+
+        assert_eq!(&ascii[..size], res.as_slice());
+    }
+
+    #[test]
+    fn i64() {
+        let res = b"706534263454";
+        let (ascii, size) = 706534263454i64.ascii_bytes();
+
+        assert_eq!(&ascii[..size], res.as_slice());
     }
 }

@@ -1,5 +1,5 @@
 #![no_std]
-use core::ops::{Div, Rem, ShrAssign};
+use core::ops::{Div, Rem};
 
 fn byte_to_ascii(byte: u8) -> u8 {
     match byte {
@@ -31,47 +31,7 @@ pub const fn digit_count(n: usize) -> usize {
     div * 3 + coefr
 }
 
-pub trait NumToAscii<const B: usize, const D: usize>:
-    Copy + ShrAssign + Div + Rem + PartialEq + Sized
-{
-    fn bits(self) -> [u8; B];
-
-    fn bit_width(self) -> usize {
-        self.bits()
-            .into_iter()
-            .enumerate()
-            .filter(|(_, bit)| *bit == 1)
-            .map(|(idx, _)| idx + 1)
-            .last()
-            .unwrap_or_else(|| 0)
-    }
-
-    fn n_as_po2() -> usize {
-        let mut n = D;
-        let mut res = 0;
-        while n > 2 {
-            n /= 2;
-            res += 1;
-        }
-
-        res
-    }
-
-    fn max_digit_count() -> usize {
-        let n = Self::n_as_po2() + 1;
-        let div = n / 10;
-        let rem = n % 10;
-        let coefr = match rem {
-            r if r > 7 => 3,
-            r if r > 4 => 2,
-            r if r > 0 => 1,
-            _ => 0,
-        };
-
-        // + 1 accounts for max digits when all bits are on
-        div * 3 + coefr + 1
-    }
-
+pub trait NumToAscii<const D: usize>: Copy + Div + Rem + PartialEq + Sized {
     fn get_num_digits(self) -> ([u8; D], usize);
 
     fn asciify(self) -> ([u8; D], usize) {
@@ -85,18 +45,8 @@ pub trait NumToAscii<const B: usize, const D: usize>:
 }
 
 macro_rules! num_to_ascii {
-    ($bits: expr, $digits: expr, $numty: ty) => {
-        impl NumToAscii<$bits, { $digits }> for $numty {
-            fn bits(mut self) -> [u8; $bits] {
-                let mut bits = [0u8; $bits];
-                for idx in 0..8 {
-                    bits[idx] = self as u8 & 1;
-                    self >>= 1;
-                }
-
-                bits
-            }
-
+    ($digits: expr, $numty: ty) => {
+        impl NumToAscii<{ $digits }> for $numty {
             fn get_num_digits(mut self) -> ([u8; $digits], usize) {
                 let mut nums = [0; _];
                 let mut idx = 0;
@@ -119,17 +69,17 @@ macro_rules! num_to_ascii {
 }
 
 macro_rules! num_to_ascii_many {
-    ($({ bits = $bits: expr , digits = $digits: expr, type = $numty: ty }),+) => {
+    ($({  digits = $digits: expr, type = $numty: ty }),+) => {
         $(
-            num_to_ascii!($bits, $digits, $numty);
+            num_to_ascii!($digits, $numty);
         )+
     }
 }
 
 num_to_ascii_many!(
-    { bits = 8, digits = digit_count(8) + 1, type = u8 },
-    { bits = 16, digits = digit_count(16) + 1, type = u16 },
-    { bits = 32, digits = digit_count(32) + 1, type = u32 },
-    { bits = 64, digits = digit_count(64) + 1, type = u64 },
-    { bits = 128, digits = digit_count(128) + 1, type = u128 }
+    { digits = digit_count(8) + 1, type = u8 },
+    { digits = digit_count(16) + 1, type = u16 },
+    { digits = digit_count(32) + 1, type = u32 },
+    { digits = digit_count(64) + 1, type = u64 },
+    { digits = digit_count(128) + 1, type = u128 }
 );

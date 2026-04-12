@@ -84,11 +84,13 @@ num_to_ascii_many!(
     { digits = digit_count(16) + 1, type = u16 },
     { digits = digit_count(32) + 1, type = u32 },
     { digits = digit_count(64) + 1, type = u64 },
+    { digits = digit_count(64) + 1, type = usize },
     { digits = digit_count(128) + 1, type = u128 },
     { digits = digit_count(8) + 1, type = i8 },
     { digits = digit_count(16) + 1, type = i16 },
     { digits = digit_count(32) + 1, type = i32 },
     { digits = digit_count(64) + 1, type = i64 },
+    { digits = digit_count(64) + 1, type = isize },
     { digits = digit_count(128) + 1, type = i128 }
 
 );
